@@ -1,0 +1,79 @@
+// Prisma schema for the TripSplit HR platform (recruitment tracking)
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// SQLite has no native enum type, so pipeline/status values are plain
+// strings validated in application code (see src/lib/constants.ts).
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("RECRUITER")
+  createdAt    DateTime @default(now())
+
+  notes Note[]
+}
+
+model JobPosition {
+  id             String   @id @default(cuid())
+  title          String
+  department     String
+  location       String
+  employmentType String   @default("FULL_TIME")
+  status         String   @default("OPEN")
+  description    String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  applications Application[]
+}
+
+model Candidate {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String
+  phone       String   @default("")
+  linkedinUrl String   @default("")
+  source      String   @default("OTHER")
+  createdAt   DateTime @default(now())
+
+  applications Application[]
+}
+
+model Application {
+  id            String   @id @default(cuid())
+  candidateId   String
+  jobPositionId String
+  stage         String   @default("APPLIED")
+  rating        Int?
+  appliedAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  candidate   Candidate   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobPosition JobPosition @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
+  notes       Note[]
+
+  @@unique([candidateId, jobPositionId])
+}
+
+model Note {
+  id            String   @id @default(cuid())
+  applicationId String
+  authorId      String
+  body          String
+  createdAt     DateTime @default(now())
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  author      User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}

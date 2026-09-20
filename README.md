@@ -61,3 +61,10 @@ The app is built and the source is complete. It is pending Xcode simulator verif
 ## License
 
 TripSplit is available under the MIT License. See `LICENSE` for details.
+
+## Other projects in this repository
+
+- **`hr-platform/`** — TripSplit HR, a separate Next.js + Prisma web app
+  for tracking job applications and hiring pipelines. See
+  [`hr-platform/README.md`](hr-platform/README.md) for details. It shares
+  no code with the iOS app above.
