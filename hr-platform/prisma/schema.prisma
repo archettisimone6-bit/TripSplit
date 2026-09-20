@@ -60,11 +60,48 @@ model Application {
   appliedAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  candidate   Candidate    @relation(fields: [candidateId], references: [id], onDelete: Cascade)
-  jobPosition JobPosition? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
+  candidate   Candidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobPosition JobPosition?      @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
   notes       Note[]
+  profile     CandidateProfile?
 
   @@unique([candidateId, jobPositionId])
+}
+
+// Second-step "get to know you" questionnaire, filled in by the candidate
+// through a dedicated no-login link shared by staff from the application
+// page (not part of the short first-contact form at /candidatura, which
+// stays minimal on purpose). One per application.
+//
+// Deliberately excluded: questions about smoking or drug use. Under Italian
+// law (Statuto dei Lavoratori, art. 8) employers may not investigate facts
+// unrelated to professional aptitude, and this kind of data is a special
+// health-data category under GDPR art. 9 — collecting it through a hiring
+// form has no valid legal basis.
+model CandidateProfile {
+  id            String   @id @default(cuid())
+  applicationId String   @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  playsSport               Boolean?
+  sportDetails             String   @default("")
+  hobbies                  String   @default("")
+  countriesVisited         String   @default("")
+  iseoFavorite1            String   @default("")
+  iseoFavorite2            String   @default("")
+  iseoFavorite3            String   @default("")
+  manualSkills             String   @default("")
+  manualSkillsIsSatisfying Boolean?
+
+  hasDrivingLicenseAndVehicle Boolean?
+  availableFrom               String   @default("")
+  workPreference              String   @default("")
+  motivation                  String   @default("")
+  languages                   String   @default("")
+  priorExperience             String   @default("")
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 }
 
 // A Note is either a manual entry written by a staff member ("NOTE") or an

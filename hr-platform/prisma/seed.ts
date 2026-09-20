@@ -140,6 +140,27 @@ async function main() {
     },
   });
 
+  await prisma.candidateProfile.create({
+    data: {
+      applicationId: applications[0].id,
+      playsSport: true,
+      sportDetails: "Corsa e arrampicata",
+      hobbies: "Fotografia, cucina, escursioni in montagna",
+      countriesVisited: "Francia, Spagna, Portogallo, Giappone",
+      iseoFavorite1: "Il lungolago",
+      iseoFavorite2: "La Torre dell'Orologio",
+      iseoFavorite3: "Il mercato del venerdì",
+      manualSkills: "Piccoli lavori di falegnameria, mi piace molto",
+      manualSkillsIsSatisfying: true,
+      hasDrivingLicenseAndVehicle: true,
+      availableFrom: "Da subito",
+      workPreference: "In squadra",
+      languages: "Inglese, un po' di francese",
+      priorExperience: "3 anni come backend developer in una startup fintech",
+      motivation: "Mi piace l'idea di lavorare su un prodotto usato da persone vere, ogni giorno",
+    },
+  });
+
   console.log("Seed completato.");
   console.log(`Login: ${adminEmail} / ${adminPassword}`);
 }

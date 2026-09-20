@@ -31,6 +31,14 @@ assunzione.
   scritte dallo staff e voci automatiche (candidatura creata, cambi di
   fase), oltre a una valutazione a stelle (1-5). Questa è la sezione dove
   si tiene traccia di tutto ciò che riguarda un singolo candidato.
+- **Questionario conoscitivo** (`/questionario/[id]`, nessun login
+  richiesto) — secondo modulo, opzionale e più approfondito del primo,
+  condivisibile con un link dedicato dalla pagina di ogni candidatura
+  (interessi, hobby, paesi visitati, abilità manuali, disponibilità,
+  patente, lingue, esperienze pregresse, motivazione). Non chiede dati
+  sanitari (fumo, sostanze): sono esclusi di proposito perché la loro
+  raccolta in fase di selezione è vietata dall'art. 8 dello Statuto dei
+  Lavoratori ed è "dato relativo alla salute" ai sensi del GDPR (art. 9).
 - **Dashboard** — conteggi di posizioni aperte, candidati, candidature per
   fase e attività recente.
 
@@ -80,12 +88,13 @@ qualunque deploy reale.
 ```text
 hr-platform/
 ├── prisma/
-│   ├── schema.prisma       Modelli dati (User, JobPosition, Candidate, Application, Note)
+│   ├── schema.prisma       Modelli dati (User, JobPosition, Candidate, Application, Note, CandidateProfile)
 │   ├── migrations/         Migration SQL generate da Prisma
 │   └── seed.ts             Script di seed (utente admin + dati demo)
 ├── src/
 │   ├── app/
 │   │   ├── candidatura/    Modulo pubblico di autocandidatura (no login)
+│   │   ├── questionario/   Questionario conoscitivo per candidatura (no login)
 │   │   ├── (auth)/login/   Pagina e Server Action di login staff
 │   │   └── (app)/          Sezione autenticata: dashboard, posizioni,
 │   │                       candidati, pipeline, candidature

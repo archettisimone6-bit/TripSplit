@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { StageBadge } from "@/components/badge";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { CopyLink } from "@/components/copy-link";
+import { getBaseUrl } from "@/lib/site-url";
 import {
   APPLICATION_STAGES,
   APPLICATION_STAGE_LABELS,
@@ -31,6 +33,7 @@ export default async function ApplicationDetailPage({
         orderBy: { createdAt: "desc" },
         include: { author: true },
       },
+      profile: true,
     },
   });
 
@@ -42,6 +45,8 @@ export default async function ApplicationDetailPage({
   const deleteWithId = deleteApplication.bind(null, application.id);
   const addNoteWithId = addApplicationNote.bind(null, application.id);
   const rateWithId = updateApplicationRating.bind(null, application.id);
+  const baseUrl = await getBaseUrl();
+  const questionnaireLink = `${baseUrl}/questionario/${application.id}`;
 
   return (
     <div className="space-y-6">
@@ -153,6 +158,80 @@ export default async function ApplicationDetailPage({
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-semibold text-slate-900">
+          Questionario conoscitivo
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Invia questo link al candidato per raccogliere qualche informazione
+          in più (interessi, disponibilità, esperienze). Nessun campo è
+          obbligatorio per lui.
+        </p>
+        <div className="mt-3">
+          <CopyLink url={questionnaireLink} />
+        </div>
+
+        {application.profile ? (
+          <dl className="mt-6 grid grid-cols-1 gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+            <ProfileRow label="Fa sport?" value={yesNo(application.profile.playsSport)} />
+            <ProfileRow label="Quale sport" value={application.profile.sportDetails} />
+            <ProfileRow label="Hobby" value={application.profile.hobbies} wide />
+            <ProfileRow
+              label="Paesi visitati"
+              value={application.profile.countriesVisited}
+              wide
+            />
+            <ProfileRow
+              label="Cosa gli/le piace di Iseo"
+              value={[
+                application.profile.iseoFavorite1,
+                application.profile.iseoFavorite2,
+                application.profile.iseoFavorite3,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+              wide
+            />
+            <ProfileRow
+              label="Abilità manuali"
+              value={application.profile.manualSkills}
+              wide
+            />
+            <ProfileRow
+              label="Gli/le dà soddisfazione?"
+              value={yesNo(application.profile.manualSkillsIsSatisfying)}
+            />
+            <ProfileRow
+              label="Patente e mezzo proprio"
+              value={yesNo(application.profile.hasDrivingLicenseAndVehicle)}
+            />
+            <ProfileRow
+              label="Disponibile da"
+              value={application.profile.availableFrom}
+            />
+            <ProfileRow
+              label="Preferenza di lavoro"
+              value={application.profile.workPreference}
+            />
+            <ProfileRow label="Lingue" value={application.profile.languages} />
+            <ProfileRow
+              label="Esperienze precedenti"
+              value={application.profile.priorExperience}
+              wide
+            />
+            <ProfileRow
+              label="Motivazione"
+              value={application.profile.motivation}
+              wide
+            />
+          </dl>
+        ) : (
+          <p className="mt-4 text-sm text-slate-500">
+            Il candidato non ha ancora compilato il questionario.
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-slate-900">
           Note e attività
         </h2>
 
@@ -227,6 +306,29 @@ function Row({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between">
       <dt className="text-slate-500">{label}</dt>
       <dd className="text-slate-900">{value}</dd>
+    </div>
+  );
+}
+
+function yesNo(value: boolean | null | undefined) {
+  if (value === true) return "Sì";
+  if (value === false) return "No";
+  return "";
+}
+
+function ProfileRow({
+  label,
+  value,
+  wide,
+}: {
+  label: string;
+  value: string;
+  wide?: boolean;
+}) {
+  return (
+    <div className={wide ? "sm:col-span-2" : undefined}>
+      <dt className="text-slate-500">{label}</dt>
+      <dd className="whitespace-pre-wrap text-slate-900">{value || "—"}</dd>
     </div>
   );
 }
