@@ -3,8 +3,16 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { Prisma } from "@/generated/prisma/client";
 import { requireSession } from "@/lib/auth";
 import { CANDIDATE_SOURCES, type CandidateSource } from "@/lib/constants";
+
+function isDuplicateEmailError(error: unknown) {
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  );
+}
 
 function readCandidateForm(formData: FormData) {
   const firstName = String(formData.get("firstName") ?? "").trim();
@@ -31,7 +39,15 @@ export async function createCandidate(formData: FormData) {
   await requireSession();
   const data = readCandidateForm(formData);
 
-  const candidate = await prisma.candidate.create({ data });
+  let candidate;
+  try {
+    candidate = await prisma.candidate.create({ data });
+  } catch (error) {
+    if (isDuplicateEmailError(error)) {
+      redirect("/candidates/new?errore=email-duplicata");
+    }
+    throw error;
+  }
 
   revalidatePath("/candidates");
   redirect(`/candidates/${candidate.id}`);
@@ -41,7 +57,14 @@ export async function updateCandidate(id: string, formData: FormData) {
   await requireSession();
   const data = readCandidateForm(formData);
 
-  await prisma.candidate.update({ where: { id }, data });
+  try {
+    await prisma.candidate.update({ where: { id }, data });
+  } catch (error) {
+    if (isDuplicateEmailError(error)) {
+      redirect(`/candidates/${id}/edit?errore=email-duplicata`);
+    }
+    throw error;
+  }
 
   revalidatePath("/candidates");
   revalidatePath(`/candidates/${id}`);

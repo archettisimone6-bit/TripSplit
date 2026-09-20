@@ -5,10 +5,13 @@ import { updateCandidate } from "../../actions";
 
 export default async function EditCandidatePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ errore?: string }>;
 }) {
   const { id } = await params;
+  const { errore } = await searchParams;
   const candidate = await prisma.candidate.findUnique({ where: { id } });
 
   if (!candidate) {
@@ -25,6 +28,12 @@ export default async function EditCandidatePage({
       <p className="mt-1 text-sm text-slate-500">
         {candidate.firstName} {candidate.lastName}
       </p>
+
+      {errore === "email-duplicata" && (
+        <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+          Esiste già un altro candidato con questa email.
+        </p>
+      )}
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
         <CandidateForm

@@ -29,4 +29,10 @@ body {
   .form-input {
     @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none;
   }
+
+  /* Larger touch targets and text for the public, no-login application
+     form, aimed at people with little computer experience. */
+  .big-input {
+    @apply w-full rounded-xl border-2 border-slate-300 px-4 py-3 text-lg text-slate-900 shadow-sm focus:border-slate-600 focus:outline-none;
+  }
 }

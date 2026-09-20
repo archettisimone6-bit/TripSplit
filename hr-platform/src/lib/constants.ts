@@ -67,6 +67,7 @@ export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
 };
 
 export const CANDIDATE_SOURCES = [
+  "PUBLIC_FORM",
   "WEBSITE",
   "REFERRAL",
   "LINKEDIN",
@@ -76,9 +77,16 @@ export const CANDIDATE_SOURCES = [
 export type CandidateSource = (typeof CANDIDATE_SOURCES)[number];
 
 export const CANDIDATE_SOURCE_LABELS: Record<CandidateSource, string> = {
+  PUBLIC_FORM: "Modulo di autocandidatura",
   WEBSITE: "Sito aziendale",
   REFERRAL: "Segnalazione",
   LINKEDIN: "LinkedIn",
   JOB_BOARD: "Portale annunci",
   OTHER: "Altro",
 };
+
+// Notes on an application are either a manual entry written by staff
+// ("NOTE") or an automatic timeline entry logged by the system
+// ("ACTIVITY", e.g. a stage change or the application being created).
+export const NOTE_KINDS = ["NOTE", "ACTIVITY"] as const;
+export type NoteKind = (typeof NOTE_KINDS)[number];

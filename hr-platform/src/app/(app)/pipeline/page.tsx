@@ -15,10 +15,17 @@ export default async function PipelinePage({
 }) {
   const { positionId } = await searchParams;
 
+  const where =
+    positionId === "SPONTANEOUS"
+      ? { jobPositionId: null }
+      : positionId
+        ? { jobPositionId: positionId }
+        : undefined;
+
   const [positions, applications] = await Promise.all([
     prisma.jobPosition.findMany({ orderBy: { title: "asc" } }),
     prisma.application.findMany({
-      where: positionId ? { jobPositionId: positionId } : undefined,
+      where,
       orderBy: { updatedAt: "desc" },
       include: { candidate: true, jobPosition: true },
     }),
@@ -47,6 +54,7 @@ export default async function PipelinePage({
             className="form-input"
           >
             <option value="">Tutte le posizioni</option>
+            <option value="SPONTANEOUS">Candidature spontanee</option>
             {positions.map((position) => (
               <option key={position.id} value={position.id}>
                 {position.title}
@@ -101,7 +109,7 @@ export default async function PipelinePage({
                         {application.candidate.lastName}
                       </Link>
                       <p className="mt-0.5 text-xs text-slate-500">
-                        {application.jobPosition.title}
+                        {application.jobPosition?.title ?? "Candidatura spontanea"}
                       </p>
                       {advance && (
                         <form action={advance} className="mt-2">

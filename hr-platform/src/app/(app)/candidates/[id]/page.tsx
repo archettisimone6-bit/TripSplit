@@ -116,11 +116,13 @@ export default async function CandidateDetailPage({
                     href={`/applications/${application.id}`}
                     className="text-sm font-medium text-slate-900 hover:underline"
                   >
-                    {application.jobPosition.title}
+                    {application.jobPosition?.title ?? "Candidatura spontanea"}
                   </Link>
-                  <p className="text-xs text-slate-500">
-                    {application.jobPosition.department}
-                  </p>
+                  {application.jobPosition && (
+                    <p className="text-xs text-slate-500">
+                      {application.jobPosition.department}
+                    </p>
+                  )}
                 </div>
                 <StageBadge stage={application.stage as ApplicationStage} />
               </li>

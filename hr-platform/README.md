@@ -6,18 +6,31 @@ assunzione.
 
 ## Funzionalità
 
-- **Autenticazione** — accesso protetto con sessione via cookie firmato.
+- **Modulo di autocandidatura pubblico** (`/candidatura`, nessun login
+  richiesto) — pagina volutamente essenziale, pensata per chi non ha
+  dimestichezza con il computer: pochi campi grandi, un solo bottone,
+  nessun gergo tecnico. Il candidato inserisce da solo i propri dati e,
+  se lo sceglie lo staff, la posizione può essere già preselezionata
+  condividendo il link dedicato mostrato nella pagina di ogni posizione
+  (o quello generico in dashboard). L'invio crea automaticamente il
+  candidato e la candidatura, gestendo in modo trasparente eventuali
+  invii doppi.
+- **Autenticazione staff** — accesso protetto con sessione via cookie
+  firmato per l'area interna di gestione.
 - **Posizioni aperte** — creazione, modifica ed eliminazione di annunci
   (titolo, dipartimento, sede, tipo di contratto, stato, descrizione).
-- **Candidati** — anagrafica con contatti, fonte di provenienza e ricerca
-  per nome/email.
-- **Candidature** — collegamento candidato ↔ posizione, con vincolo che
-  impedisce duplicati sulla stessa posizione.
+- **Candidati** — anagrafica con contatti, fonte di provenienza (incluse
+  le autocandidature) e ricerca per nome/email.
+- **Candidature** — collegamento candidato ↔ posizione (o "candidatura
+  spontanea" senza posizione specifica), con vincolo che impedisce
+  duplicati sulla stessa posizione.
 - **Pipeline** — board in stile kanban con le fasi Candidatura ricevuta →
   Screening CV → Colloquio → Offerta inviata → Assunto/Rifiutato,
   filtrabile per posizione, con avanzamento di fase con un click.
-- **Note e valutazioni** — timeline di note per ogni candidatura e
-  valutazione a stelle (1-5).
+- **Note e attività** — timeline per ogni candidatura che unisce note
+  scritte dallo staff e voci automatiche (candidatura creata, cambi di
+  fase), oltre a una valutazione a stelle (1-5). Questa è la sezione dove
+  si tiene traccia di tutto ciò che riguarda un singolo candidato.
 - **Dashboard** — conteggi di posizioni aperte, candidati, candidature per
   fase e attività recente.
 
@@ -72,7 +85,8 @@ hr-platform/
 │   └── seed.ts             Script di seed (utente admin + dati demo)
 ├── src/
 │   ├── app/
-│   │   ├── (auth)/login/   Pagina e Server Action di login
+│   │   ├── candidatura/    Modulo pubblico di autocandidatura (no login)
+│   │   ├── (auth)/login/   Pagina e Server Action di login staff
 │   │   └── (app)/          Sezione autenticata: dashboard, posizioni,
 │   │                       candidati, pipeline, candidature
 │   ├── components/         Componenti UI condivisi (nav, badge, ecc.)

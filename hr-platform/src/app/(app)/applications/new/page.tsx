@@ -64,13 +64,10 @@ export default async function NewApplicationPage({
             <select
               id="jobPositionId"
               name="jobPositionId"
-              required
               defaultValue={positionId ?? ""}
               className="form-input mt-1"
             >
-              <option value="" disabled>
-                Seleziona una posizione
-              </option>
+              <option value="">Candidatura spontanea (nessuna posizione)</option>
               {positions.map((position) => (
                 <option key={position.id} value={position.id}>
                   {position.title} · {position.department}

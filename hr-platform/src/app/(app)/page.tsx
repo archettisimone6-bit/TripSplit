@@ -6,6 +6,8 @@ import {
   type ApplicationStage,
 } from "@/lib/constants";
 import { StageBadge } from "@/components/badge";
+import { CopyLink } from "@/components/copy-link";
+import { getBaseUrl } from "@/lib/site-url";
 
 export default async function DashboardPage() {
   const [openPositions, totalCandidates, stageCounts, recentApplications] =
@@ -31,6 +33,8 @@ export default async function DashboardPage() {
     0
   );
   const hiredCount = countByStage.HIRED ?? 0;
+  const baseUrl = await getBaseUrl();
+  const publicApplyLink = `${baseUrl}/candidatura`;
 
   return (
     <div className="space-y-8">
@@ -39,6 +43,20 @@ export default async function DashboardPage() {
         <p className="mt-1 text-sm text-slate-500">
           Panoramica delle posizioni aperte e del processo di selezione.
         </p>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Modulo di candidatura pubblico
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Condividi questo link con chi vuole candidarsi: potrà inserire i
+          propri dati da solo, senza account. Per una posizione specifica,
+          usa il link dedicato nella sua pagina.
+        </p>
+        <div className="mt-3">
+          <CopyLink url={publicApplyLink} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -102,7 +120,7 @@ export default async function DashboardPage() {
                     {application.candidate.lastName}
                   </Link>
                   <p className="text-xs text-slate-500">
-                    {application.jobPosition.title}
+                    {application.jobPosition?.title ?? "Candidatura spontanea"}
                   </p>
                 </div>
                 <StageBadge stage={application.stage as ApplicationStage} />

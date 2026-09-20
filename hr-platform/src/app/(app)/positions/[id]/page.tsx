@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { StageBadge, StatusBadge } from "@/components/badge";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { CopyLink } from "@/components/copy-link";
+import { getBaseUrl } from "@/lib/site-url";
 import {
   EMPLOYMENT_TYPE_LABELS,
   type ApplicationStage,
@@ -33,6 +35,8 @@ export default async function PositionDetailPage({
   }
 
   const deleteWithId = deletePosition.bind(null, position.id);
+  const baseUrl = await getBaseUrl();
+  const applyLink = `${baseUrl}/candidatura?posizione=${position.id}`;
 
   return (
     <div className="space-y-6">
@@ -71,6 +75,19 @@ export default async function PositionDetailPage({
               Elimina
             </ConfirmSubmitButton>
           </form>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="text-sm font-semibold text-slate-900">
+          Modulo di candidatura da condividere
+        </h2>
+        <p className="mt-1 text-sm text-slate-500">
+          Invia questo link al candidato: potrà inserire i propri dati da
+          solo, senza bisogno di accedere alla piattaforma.
+        </p>
+        <div className="mt-3">
+          <CopyLink url={applyLink} />
         </div>
       </div>
 

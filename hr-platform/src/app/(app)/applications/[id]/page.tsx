@@ -56,14 +56,20 @@ export default async function ApplicationDetailPage({
             </Link>
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            Candidatura per{" "}
-            <Link
-              href={`/positions/${application.jobPosition.id}`}
-              className="font-medium text-slate-700 hover:underline"
-            >
-              {application.jobPosition.title}
-            </Link>{" "}
-            · {application.jobPosition.department}
+            {application.jobPosition ? (
+              <>
+                Candidatura per{" "}
+                <Link
+                  href={`/positions/${application.jobPosition.id}`}
+                  className="font-medium text-slate-700 hover:underline"
+                >
+                  {application.jobPosition.title}
+                </Link>{" "}
+                · {application.jobPosition.department}
+              </>
+            ) : (
+              "Candidatura spontanea (nessuna posizione specifica)"
+            )}
           </p>
         </div>
         <form action={deleteWithId}>
@@ -147,7 +153,7 @@ export default async function ApplicationDetailPage({
 
       <div className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="text-sm font-semibold text-slate-900">
-          Note e colloqui
+          Note e attività
         </h2>
 
         <form action={addNoteWithId} className="mt-4 space-y-2">
@@ -167,26 +173,48 @@ export default async function ApplicationDetailPage({
         </form>
 
         {application.notes.length === 0 ? (
-          <p className="mt-4 text-sm text-slate-500">Nessuna nota ancora.</p>
+          <p className="mt-4 text-sm text-slate-500">
+            Nessuna nota o attività ancora.
+          </p>
         ) : (
-          <ul className="mt-6 space-y-4">
-            {application.notes.map((note) => (
-              <li
-                key={note.id}
-                className="rounded-lg border border-slate-100 bg-slate-50 p-4"
-              >
-                <p className="whitespace-pre-wrap text-sm text-slate-700">
-                  {note.body}
-                </p>
-                <p className="mt-2 text-xs text-slate-400">
-                  {note.author.name} ·{" "}
-                  {new Intl.DateTimeFormat("it-IT", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  }).format(note.createdAt)}
-                </p>
-              </li>
-            ))}
+          <ul className="mt-6 space-y-3">
+            {application.notes.map((note) => {
+              const isActivity = note.kind === "ACTIVITY";
+              const authorLabel =
+                note.author?.name ?? (isActivity ? "Sistema" : "Candidato");
+              return (
+                <li
+                  key={note.id}
+                  className={`rounded-lg border p-4 ${
+                    isActivity
+                      ? "border-slate-100 bg-white"
+                      : "border-slate-100 bg-slate-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
+                        isActivity
+                          ? "bg-slate-100 text-slate-500"
+                          : "bg-sky-100 text-sky-700"
+                      }`}
+                    >
+                      {isActivity ? "Attività" : "Nota"}
+                    </span>
+                  </div>
+                  <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">
+                    {note.body}
+                  </p>
+                  <p className="mt-2 text-xs text-slate-400">
+                    {authorLabel} ·{" "}
+                    {new Intl.DateTimeFormat("it-IT", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    }).format(note.createdAt)}
+                  </p>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

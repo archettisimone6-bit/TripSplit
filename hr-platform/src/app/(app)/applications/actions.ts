@@ -4,34 +4,48 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireSession } from "@/lib/auth";
-import { APPLICATION_STAGES, type ApplicationStage } from "@/lib/constants";
+import { logActivity } from "@/lib/activity";
+import {
+  APPLICATION_STAGES,
+  APPLICATION_STAGE_LABELS,
+  type ApplicationStage,
+} from "@/lib/constants";
 
 export async function createApplication(formData: FormData) {
-  await requireSession();
+  const session = await requireSession();
 
   const candidateId = String(formData.get("candidateId") ?? "");
-  const jobPositionId = String(formData.get("jobPositionId") ?? "");
+  const jobPositionId = String(formData.get("jobPositionId") ?? "") || null;
 
-  if (!candidateId || !jobPositionId) {
-    throw new Error("Seleziona un candidato e una posizione.");
+  if (!candidateId) {
+    throw new Error("Seleziona un candidato.");
   }
 
-  const existing = await prisma.application.findUnique({
-    where: {
-      candidateId_jobPositionId: { candidateId, jobPositionId },
-    },
-  });
+  if (jobPositionId) {
+    const existing = await prisma.application.findUnique({
+      where: {
+        candidateId_jobPositionId: { candidateId, jobPositionId },
+      },
+    });
 
-  if (existing) {
-    redirect(`/applications/${existing.id}`);
+    if (existing) {
+      redirect(`/applications/${existing.id}`);
+    }
   }
 
   const application = await prisma.application.create({
     data: { candidateId, jobPositionId },
   });
 
+  await logActivity({
+    applicationId: application.id,
+    authorId: session.userId,
+    body: `Candidatura creata da ${session.name}.`,
+  });
+
   revalidatePath("/pipeline");
-  revalidatePath(`/positions/${jobPositionId}`);
+  revalidatePath("/");
+  if (jobPositionId) revalidatePath(`/positions/${jobPositionId}`);
   revalidatePath(`/candidates/${candidateId}`);
   redirect(`/applications/${application.id}`);
 }
@@ -40,20 +54,34 @@ export async function updateApplicationStage(
   id: string,
   stage: ApplicationStage
 ) {
-  await requireSession();
+  const session = await requireSession();
 
   if (!APPLICATION_STAGES.includes(stage)) {
     throw new Error("Fase non valida.");
   }
+
+  const before = await prisma.application.findUniqueOrThrow({
+    where: { id },
+  });
 
   const application = await prisma.application.update({
     where: { id },
     data: { stage },
   });
 
+  if (before.stage !== stage) {
+    await logActivity({
+      applicationId: id,
+      authorId: session.userId,
+      body: `Fase aggiornata: ${APPLICATION_STAGE_LABELS[before.stage as ApplicationStage] ?? before.stage} → ${APPLICATION_STAGE_LABELS[stage]}.`,
+    });
+  }
+
   revalidatePath("/pipeline");
   revalidatePath(`/applications/${id}`);
-  revalidatePath(`/positions/${application.jobPositionId}`);
+  if (application.jobPositionId) {
+    revalidatePath(`/positions/${application.jobPositionId}`);
+  }
   revalidatePath(`/candidates/${application.candidateId}`);
   revalidatePath("/");
 }
@@ -82,6 +110,7 @@ export async function addApplicationNote(id: string, formData: FormData) {
     data: {
       applicationId: id,
       authorId: session.userId,
+      kind: "NOTE",
       body,
     },
   });
@@ -94,7 +123,11 @@ export async function deleteApplication(id: string) {
   const application = await prisma.application.delete({ where: { id } });
 
   revalidatePath("/pipeline");
-  revalidatePath(`/positions/${application.jobPositionId}`);
+  revalidatePath("/");
   revalidatePath(`/candidates/${application.candidateId}`);
-  redirect(`/positions/${application.jobPositionId}`);
+  if (application.jobPositionId) {
+    revalidatePath(`/positions/${application.jobPositionId}`);
+    redirect(`/positions/${application.jobPositionId}`);
+  }
+  redirect(`/candidates/${application.candidateId}`);
 }
